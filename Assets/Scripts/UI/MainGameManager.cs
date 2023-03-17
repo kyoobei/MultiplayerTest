@@ -1,5 +1,7 @@
 using UnityEngine;
 using Gelo.UI;
+using Gelo.UI.Controller;
+
 namespace Gelo.Game
 {
     public class MainGameManager : MonoBehaviour
@@ -7,8 +9,13 @@ namespace Gelo.Game
         [SerializeField]
         private MainMenuManager m_mainMenuManager;
         [SerializeField]
-        private GameObject m_gameUI;
+        private NetworkManager m_networkManager;
+        [SerializeField]
+        private DialogController m_dialogController;
 
+        [SerializeField]
+        private GameObject m_gameUI;
+      
         private void OnEnable()
         {
             m_mainMenuManager.OnStartGame += RecievedStartGame;
@@ -19,7 +26,8 @@ namespace Gelo.Game
         }
         private void RecievedStartGame()
         {
-            m_gameUI.SetActive(true);
+            m_networkManager.StartGame();
+            // m_gameUI.SetActive(true);
         }
     }
 }
