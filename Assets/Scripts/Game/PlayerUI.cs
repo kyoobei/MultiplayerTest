@@ -27,7 +27,7 @@ namespace Gelo.Game
 
         public override void Spawned()
         {
-            if (Object.HasStateAuthority)
+            if (Object.HasInputAuthority)
             {
                 RPC_SetName(Server.Instance.Auth.Email);
                 m_plusBtn.gameObject.SetActive(false);
@@ -35,6 +35,11 @@ namespace Gelo.Game
                 GetCurrentScore();
                 ListenToRealm();
             }
+        }
+
+        public override void Despawned(NetworkRunner runner, bool hasState)
+        {
+            base.Despawned(runner, hasState);
         }
 
         private static void OnChangedName(Changed<PlayerUI> changed)
@@ -66,14 +71,22 @@ namespace Gelo.Game
         }
         #endregion
         #region UI
-        public async void ClickedAddScore()
+        public void ClickedAddScore()
         {
-            object[] param = { m_playerName, 1 };
+            AddScore();
+        }
+        public void ClickedMinusScore()
+        {
+            RemoveScore();
+        }
+        private async void AddScore()
+        {
+            object[] param = { m_playerName.text, 1 };
             var value = await Server.Instance.Function.Call<BsonDocument>("users_addScore", param);
         }
-        public async void ClickedMinusScore()
+        private async void RemoveScore()
         {
-            object[] param = { m_playerName, -1 };
+            object[] param = { m_playerName.text, -1 };
             var value = await Server.Instance.Function.Call<BsonDocument>("users_addScore", param);
         }
         #endregion
@@ -81,11 +94,11 @@ namespace Gelo.Game
         private void ListenToRealm()
         {
             string player = $"player={Server.Instance.Auth.CurrentUser.Id}";
-            Server.Instance.Sync.StartRealm("score", player, (isValid, result) =>
+            Server.Instance.Sync.StartRealm(player, player, (isValid, result) =>
             {
                 if (isValid)
                 {
-                    Server.Instance.Sync.ListenToRealmCollection<data_players>("score", ListeningToDataUpdate, 
+                    Server.Instance.Sync.ListenToRealmCollection<data_players>(player, ListeningToDataUpdate, 
                         (isListenValid, isListenResult)=> 
                         {
                             if (!isValid) 
